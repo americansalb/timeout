@@ -1,12 +1,13 @@
 import os
 import time
-from flask import Flask, Response, request
-from elevenlabs import ElevenLabsClient, ClientTools
+from flask import Flask, Response
+from elevenlabs import ElevenLabs
+from elevenlabs.conversational_ai.conversation import Conversation, ClientTools
 
 app = Flask(__name__)
 
 # Initialize ElevenLabs client and register the PAUSE tool
-xi = ElevenLabsClient(api_key=os.environ.get("XI_API_KEY"))
+xi = ElevenLabs(api_key=os.environ.get("XI_API_KEY"))
 tools = ClientTools()
 
 def pause_handler(params):
@@ -14,11 +15,12 @@ def pause_handler(params):
     while True:
         time.sleep(1)
 
-# Register the client tool with the exact name from the dashboard
-tools.register(os.environ.get("TOOL_NAME"), pause_handler)
+# Register the client tool using its explicit name
+tools.register("PAUSE_5_Second", pause_handler)
 
 # Create a conversation instance so the tool registration takes effect
-conversation = xi.conversation(
+conversation = Conversation(
+    client=xi,
     agent_id=os.environ.get("XI_AGENT_ID"),
     client_tools=tools
 )
