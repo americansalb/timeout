@@ -2,49 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>English Speaking Test</title>
+
+  <!-- 1️⃣  Register the client-side tool BEFORE the widget loads -->
+  <script>
+    // Create the global namespace the widget looks for
+    window.ElevenLabsConAI = window.ElevenLabsConAI || {};
+    window.ElevenLabsConAI.tools = [
+      {
+        /* must exactly match the name the agent calls */
+        name: "PAUSE_5_Second",
+
+        /* description shown in dashboard (optional) */
+        description: "Pause the test for 5 seconds",
+
+        /* no parameters in this tool */
+        parameters: [],
+
+        /* what to do when the agent invokes it */
+        execute: async () => {
+          /* hit the Render endpoint you already built */
+          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
+
+          /* Tell the agent we’re done (can be empty JSON) */
+          return { ok: true };
+        }
+      }
+    ];
+  </script>
 </head>
 <body>
+  <!-- 2️⃣  The embedded widget -->
   <elevenlabs-convai
-    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
-    pause-tool-name="PAUSE_5_Second">
+      agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
+      /* optional but harmless: lets the widget warn if the tool is missing */
+      pause-tool-name="PAUSE_5_Second">
   </elevenlabs-convai>
 
+  <!-- 3️⃣  Load the widget AFTER the tool list exists -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
-
-  <script>
-    const pauseTool = {
-      name: "PAUSE_5_Second",
-      execute: async ({ conversation, message, toolCall }) => {
-        console.log("⏸️ Running 5 second pause...");
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        return {
-          toolCallId: toolCall.toolCallId,
-          isFinal: true,
-          name: "PAUSE_5_Second",
-          output: "Paused for 5 seconds."
-        };
-      }
-    };
-
-    function tryRegisterTool(retries = 20) {
-      const registerFn = window?.ElevenLabsConAI?.clientTools?.register;
-      if (typeof registerFn === "function") {
-        registerFn([pauseTool]);
-        console.log("✅ Tool registered: PAUSE_5_Second");
-      } else if (retries > 0) {
-        console.log("⏳ Waiting for SDK to become available...");
-        setTimeout(() => tryRegisterTool(retries - 1), 500);
-      } else {
-        console.error("❌ Failed to register tool: SDK never became available");
-      }
-    }
-
-    // Start retry loop once widget loads
-    window.addEventListener("elevenlabs-widget-ready", () => {
-      tryRegisterTool();
-    });
-  </script>
 </body>
 </html>
