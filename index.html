@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>English Speaking Test Client</title>
+  <!-- ElevenLabs Conversational AI SDK -->
+  <script src="https://unpkg.com/@elevenlabs/conversational-ai@latest/dist/elevenlabs-conversational-ai.umd.js"></script>
+</head>
+<body>
+  <div id="conversation"></div>
+  <script>
+    const {
+      ElevenLabsClient,
+      Conversation,
+      ClientTools
+    } = window.ElevenLabsConAI;
+
+    // 1) Initialize ElevenLabs client
+    const client = new ElevenLabsClient({ apiKey: "sk_23eb1e7d3a84719ec50e4da7b4f4124c113b56b03209d65d" });
+    const tools  = new ClientTools();
+
+    // 2) Register PAUSE_5_Second to hit your Render endpoint
+    tools.register("PAUSE_5_Second", async () => {
+      await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
+      return {};
+    });
+
+    // 3) Start the conversation with the client tools
+    const conv = new Conversation({
+      client,
+      agentId: "agent_01jz3mzxkkfw09832nvhjtxqyy",
+      clientTools: tools,
+      ui: {
+        container: "#conversation"
+      }
+    });
+
+    conv.start();
+  </script>
+</body>
+</html>
