@@ -6,39 +6,44 @@
   <title>English Speaking Test</title>
 </head>
 <body>
-  <!-- Widget will render inside this tag -->
   <elevenlabs-convai
     agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
     pause-tool-name="PAUSE_5_Second">
   </elevenlabs-convai>
 
-  <!-- Load widget script -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 
-  <!-- Define your client tool AFTER the widget loads -->
   <script>
-    window.addEventListener('elevenlabs-widget-ready', () => {
-      const pauseTool = {
-        name: "PAUSE_5_Second",
-        execute: async ({ conversation, message, toolCall }) => {
-          console.log("⏸️ Running 5 second pause...");
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          return {
-            toolCallId: toolCall.toolCallId,
-            isFinal: true,
-            name: "PAUSE_5_Second",
-            output: "Paused for 5 seconds."
-          };
-        }
-      };
-
-      // Register tool
-      if (window?.ElevenLabsConAI?.clientTools?.register) {
-        window.ElevenLabsConAI.clientTools.register([pauseTool]);
-        console.log("✅ Tool registered: PAUSE_5_Second");
-      } else {
-        console.error("❌ Could not register tool: SDK not available");
+    const pauseTool = {
+      name: "PAUSE_5_Second",
+      execute: async ({ conversation, message, toolCall }) => {
+        console.log("⏸️ Running 5 second pause...");
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        return {
+          toolCallId: toolCall.toolCallId,
+          isFinal: true,
+          name: "PAUSE_5_Second",
+          output: "Paused for 5 seconds."
+        };
       }
+    };
+
+    function tryRegisterTool(retries = 20) {
+      const registerFn = window?.ElevenLabsConAI?.clientTools?.register;
+      if (typeof registerFn === "function") {
+        registerFn([pauseTool]);
+        console.log("✅ Tool registered: PAUSE_5_Second");
+      } else if (retries > 0) {
+        console.log("⏳ Waiting for SDK to become available...");
+        setTimeout(() => tryRegisterTool(retries - 1), 500);
+      } else {
+        console.error("❌ Failed to register tool: SDK never became available");
+      }
+    }
+
+    // Start retry loop once widget loads
+    window.addEventListener("elevenlabs-widget-ready", () => {
+      tryRegisterTool();
     });
   </script>
 </body>
