@@ -2,40 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>English Speaking Test</title>
 </head>
 <body>
-  <!-- Widget container -->
   <div id="widget" style="width: 600px; margin: auto;"></div>
 
-  <!-- Load the SDK synchronously to ensure availability before script execution -->
+  <!-- Load the SDK FIRST -->
   <script src="https://unpkg.com/@elevenlabs/conversational-ai@latest/dist/elevenlabs-conversational-ai.umd.js"></script>
+
+  <!-- Wait for full page + script load -->
   <script>
-    window.addEventListener("load", async () => {
-      const { ElevenLabsClient, Conversation, ClientTools, VoiceWidget } = window.ElevenLabsConAI;
+    window.addEventListener("load", () => {
+      const tryInit = () => {
+        const lib = window.ElevenLabsConAI;
+        if (!lib) {
+          console.error("SDK not yet available. Retrying...");
+          return setTimeout(tryInit, 100);
+        }
 
-      const client = new ElevenLabsClient({
-        apiKey: "sk_23eb1e7d3a84719ec50e4da7b4f4124c113b56b03209d65d"
-      });
+        const { ElevenLabsClient, Conversation, ClientTools, VoiceWidget } = lib;
 
-      const tools = new ClientTools();
-      tools.register("PAUSE_5_Second", async () => {
-        await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
-        console.log("Pause tool called");
-        return {};
-      });
+        const client = new ElevenLabsClient({
+          apiKey: "sk_23eb1e7d3a84719ec50e4da7b4f4124c113b56b03209d65d"
+        });
 
-      console.log("Tools registered:", tools.list());
+        const tools = new ClientTools();
+        tools.register("PAUSE_5_Second", async () => {
+          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
+          console.log("Pause tool invoked.");
+          return {};
+        });
 
-      const conversation = new Conversation({
-        client,
-        agentId: "agent_01jz3mzxkkfw09832nvhjtxqyy",
-        clientTools: tools,
-        ui: { container: "#widget", widget: VoiceWidget }
-      });
+        console.log("Registered tools:", tools.list());
 
-      conversation.start();
+        const conversation = new Conversation({
+          client,
+          agentId: "agent_01jz3mzxkkfw09832nvhjtxqyy",
+          clientTools: tools,
+          ui: { container: "#widget", widget: VoiceWidget }
+        });
+
+        conversation.start();
+      };
+
+      tryInit();
     });
   </script>
 </body>
