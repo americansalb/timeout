@@ -2,51 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>English Speaking Test</title>
 </head>
 <body>
-  <div id="widget" style="width: 600px; margin: auto;"></div>
+  <!-- Widget will render inside this tag -->
+  <elevenlabs-convai
+    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
+    pause-tool-name="PAUSE_5_Second">
+  </elevenlabs-convai>
 
-  <!-- Load the SDK FIRST -->
-  <script src="https://unpkg.com/@elevenlabs/conversational-ai@latest/dist/elevenlabs-conversational-ai.umd.js"></script>
+  <!-- Load widget script -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 
-  <!-- Wait for full page + script load -->
+  <!-- Define your client tool AFTER the widget loads -->
   <script>
-    window.addEventListener("load", () => {
-      const tryInit = () => {
-        const lib = window.ElevenLabsConAI;
-        if (!lib) {
-          console.error("SDK not yet available. Retrying...");
-          return setTimeout(tryInit, 100);
+    window.addEventListener('elevenlabs-widget-ready', () => {
+      const pauseTool = {
+        name: "PAUSE_5_Second",
+        execute: async ({ conversation, message, toolCall }) => {
+          console.log("⏸️ Running 5 second pause...");
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          return {
+            toolCallId: toolCall.toolCallId,
+            isFinal: true,
+            name: "PAUSE_5_Second",
+            output: "Paused for 5 seconds."
+          };
         }
-
-        const { ElevenLabsClient, Conversation, ClientTools, VoiceWidget } = lib;
-
-        const client = new ElevenLabsClient({
-          apiKey: "sk_23eb1e7d3a84719ec50e4da7b4f4124c113b56b03209d65d"
-        });
-
-        const tools = new ClientTools();
-        tools.register("PAUSE_5_Second", async () => {
-          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
-          console.log("Pause tool invoked.");
-          return {};
-        });
-
-        console.log("Registered tools:", tools.list());
-
-        const conversation = new Conversation({
-          client,
-          agentId: "agent_01jz3mzxkkfw09832nvhjtxqyy",
-          clientTools: tools,
-          ui: { container: "#widget", widget: VoiceWidget }
-        });
-
-        conversation.start();
       };
 
-      tryInit();
+      // Register tool
+      if (window?.ElevenLabsConAI?.clientTools?.register) {
+        window.ElevenLabsConAI.clientTools.register([pauseTool]);
+        console.log("✅ Tool registered: PAUSE_5_Second");
+      } else {
+        console.error("❌ Could not register tool: SDK not available");
+      }
     });
   </script>
 </body>
