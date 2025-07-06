@@ -2,33 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>English Speaking Test</title>
 </head>
 <body>
-  <!-- Widget Embed -->
+
+  <!-- 1 . Embed the widget -->
   <elevenlabs-convai
-    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
-    pause-tool-name="PAUSE_5_Second">
+    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy">
   </elevenlabs-convai>
 
-  <!-- SDK Script -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
+  <!-- 2 . Load the widget SDK -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 
-  <!-- Client Tool Registration -->
+  <!-- 3 . Register the client-side tool **before the first call** -->
   <script>
-    window.ElevenLabsConvaAI = window.ElevenLabsConvaAI || {};
-    window.ElevenLabsConvaAI.clientTools = {
-      PAUSE_5_Second: async () => {
-        console.log("PAUSE_5_Second triggered");
-        try {
-          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
-        } catch (e) {
-          console.error("Error in PAUSE_5_Second:", e);
-        }
-        return {};
-      }
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+      const widget = document.querySelector('elevenlabs-convai');
+      if (!widget) return;
+
+      widget.addEventListener('elevenlabs-convai:call', (event) => {
+        // EXACTLY per docs: replace/define the clientTools object
+        event.detail.config.clientTools = {
+          PAUSE_5_Second: async () => {
+            try {
+              await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+              console.log('PAUSE_5_Second invoked');
+            } catch (err) {
+              console.error('Pause endpoint failed:', err);
+            }
+            return {};          // must return an object (can be empty)
+          }
+        };
+      });
+    });
   </script>
+
 </body>
 </html>
