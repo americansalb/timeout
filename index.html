@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF‑8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>English Speaking Test</title>
 </head>
 <body>
+  <!-- Widget Embed -->
   <elevenlabs-convai
     agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
-    pause-tool-name="PAUSE_5_Second"
-    pause-endpoint="https://timeout-ri84.onrender.com/pause">
+    pause-tool-name="PAUSE_5_Second">
   </elevenlabs-convai>
 
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+  <!-- SDK Script -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
+
+  <!-- Client Tool Registration -->
   <script>
-    document.addEventListener('elevenlabs-convai:load', () => {
-      const widget = document.querySelector('elevenlabs-convai');
-      widget.addEventListener('elevenlabs-convai:call', (ev) => {
-        ev.detail.config.clientTools = {
-          PAUSE_5_Second: async () => {
-            await fetch(widget.getAttribute('pause-endpoint'), { method: 'POST' });
-            console.log('PAUSE_5_Second invoked');
-            return {};
-          }
-        };
-      });
-    });
+    window.ElevenLabsConvaAI = window.ElevenLabsConvaAI || {};
+    window.ElevenLabsConvaAI.clientTools = {
+      PAUSE_5_Second: async () => {
+        console.log("PAUSE_5_Second triggered");
+        try {
+          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
+        } catch (e) {
+          console.error("Error in PAUSE_5_Second:", e);
+        }
+        return {};
+      }
+    };
   </script>
 </body>
 </html>
