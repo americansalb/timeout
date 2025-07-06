@@ -1,53 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>English Speaking Test</title>
-
-  <!-- ① load the SDK *deferred* (executes before the inline script) -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
-
-  <style>
-    /* optional centering */
-    #widget { max-width: 650px; margin: 3rem auto; }
-  </style>
 </head>
 <body>
-  <!-- where the widget will appear -->
-  <div id="widget"></div>
 
-  <!-- ② bootstrap after DOM is ready *and* SDK is present -->
+  <!-- Working widget embedding -->
+  <elevenlabs-convai
+    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
+    style="display: block; margin: 2rem auto;"
+  ></elevenlabs-convai>
+
+  <!-- Load the SDK -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+
+  <!-- Register client tool AFTER widget and SDK load -->
   <script>
-    function whenSDKReady(cb) {
-      const tick = () =>
-        (window.ElevenLabsConAI && typeof window.ElevenLabsConAI.mount === 'function')
-          ? cb()
-          : requestAnimationFrame(tick);
-      tick();
+    function registerTool() {
+      if (
+        window.ElevenLabsConAI &&
+        window.ElevenLabsConAI.clientTools
+      ) {
+        window.ElevenLabsConAI.clientTools.PAUSE_5_Second = async () => {
+          console.log('↪ POST /pause');
+          await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+          console.log('✅ PAUSE_5_Second finished');
+          return {};
+        };
+        console.log('✅ Tool registered');
+      } else {
+        console.warn('⏳ Waiting for SDK...');
+        setTimeout(registerTool, 100);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      whenSDKReady(() => {
-        console.log('✅ SDK detected – mounting widget');
-
-        window.ElevenLabsConAI.mount(
-          {
-            agentId: 'agent_01jz3mzxkkfw09832nvhjtxqyy',
-
-            /* ③ tool is registered here, before the first agent turn */
-            clientTools: {
-              PAUSE_5_Second: async () => {
-                console.log('↪ POST /pause');
-                await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
-                console.log('✅ PAUSE_5_Second finished');
-                return {};
-              }
-            }
-          },
-          document.getElementById('widget')
-        );
-      });
+      registerTool();
     });
   </script>
+
 </body>
 </html>
