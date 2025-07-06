@@ -1,38 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>English Speaking Test</title>
+  <meta charset="UTF-8" />
+  <title>Speaking Test</title>
 </head>
 <body>
 
-  <!-- Embed the widget -->
-  <elevenlabs-convai
-    agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
-    pause-tool-name="PAUSE_5_Second"
-    pause-endpoint="https://timeout-ri84.onrender.com/pause">
-  </elevenlabs-convai>
+  <div id="widget-container"></div>
 
-  <!-- Load the widget SDK -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
-  
-  <!-- Register the client tool -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const widget = document.querySelector('elevenlabs-convai');
-      if (!widget) return;
 
-      widget.addEventListener('elevenlabs-convai:call', (ev) => {
-        const { clientTools } = ev.detail.config;
-        clientTools.PAUSE_5_Second = async () => {
-          await fetch(widget.getAttribute('pause-endpoint'), { method: 'POST' });
-          console.log('PAUSE_5_Second invoked');
-          return {};
-        };
-      });
+  <script>
+    // Wait for the widget script to load and define the widget
+    window.addEventListener('elevenlabs-convai-ready', () => {
+      window.ElevenLabsConAI.mount({
+        agentId: 'agent_01jz3mzxkkfw09832nvhjtxqyy',
+        theme: 'light',
+        tools: [],
+        clientTools: {
+          PAUSE_5_Second: async () => {
+            try {
+              await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+              console.log("✅ PAUSE_5_Second executed");
+              return {};
+            } catch (err) {
+              console.error("❌ Failed to call pause endpoint", err);
+              throw new Error("PAUSE_5_Second failed");
+            }
+          }
+        }
+      }, document.getElementById('widget-container'));
     });
   </script>
-  
+
 </body>
 </html>
