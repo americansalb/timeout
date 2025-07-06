@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>English Speaking Test</title>
+  <meta charset="UTF-8">
+  <title>Pause Tool Fix</title>
 </head>
 <body>
   <div id="widget-container"></div>
 
+  <!-- Correct tool registration BEFORE widget loads -->
   <script>
-    // Define the pause tool BEFORE the widget loads
-    window.ElevenLabsConAI = {
-      clientTools: {
-        "PAUSE_5_Second": {
-          type: "pause",
-          args: {
-            duration: 5000
-          }
-        }
-      }
+    window.ElevenLabsConAI = window.ElevenLabsConAI || {};
+    window.ElevenLabsConAI.defineClientTool = function(name, tool) {
+      window.ElevenLabsConAI._tools = window.ElevenLabsConAI._tools || {};
+      window.ElevenLabsConAI._tools[name] = tool;
     };
+
+    // Register the pause tool
+    window.ElevenLabsConAI.defineClientTool("PAUSE_5_Second", {
+      type: "pause",
+      args: {
+        duration: 5000
+      }
+    });
   </script>
 
-  <!-- Load the widget -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async onload="mountWidget()"></script>
+  <!-- Load widget AFTER tool is registered -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 
   <script>
-    function mountWidget() {
+    window.addEventListener("DOMContentLoaded", function () {
       const widget = document.createElement("elevenlabs-convai");
       widget.setAttribute("agent-id", "agent_01jz3mzxkkfw09832nvhjtxqyy");
       widget.setAttribute("pause-tool-name", "PAUSE_5_Second");
       widget.setAttribute("pause-endpoint", "https://timeout-ri84.onrender.com/pause");
 
       document.getElementById("widget-container").appendChild(widget);
-    }
+    });
   </script>
 </body>
 </html>
