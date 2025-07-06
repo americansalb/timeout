@@ -2,36 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Speaking Test</title>
+  <title>Speaking-Test Widget</title>
+
+  <!-- ❶ Load the SDK *deferred* so it’s guaranteed to be parsed before our JS runs -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 </head>
 <body>
+  <div id="widget-container" style="max-width:650px;margin:3rem auto;"></div>
 
-  <div id="widget-container"></div>
-
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
-
+  <!-- ❷ Our bootstrap code -->
   <script>
-    // Wait for the widget script to load and define the widget
-    window.addEventListener('elevenlabs-convai-ready', () => {
-      window.ElevenLabsConAI.mount({
-        agentId: 'agent_01jz3mzxkkfw09832nvhjtxqyy',
-        theme: 'light',
-        tools: [],
-        clientTools: {
-          PAUSE_5_Second: async () => {
-            try {
-              await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
-              console.log("✅ PAUSE_5_Second executed");
-              return {};
-            } catch (err) {
-              console.error("❌ Failed to call pause endpoint", err);
-              throw new Error("PAUSE_5_Second failed");
-            }
-          }
+    /**
+     * Wait for BOTH:
+     *   – the page’s DOMContentLoaded
+     *   – the SDK script to create window.ElevenLabsConAI
+     */
+    function whenSDKReady (cb) {
+      const test = () => {
+        if (window.ElevenLabsConAI && typeof window.ElevenLabsConAI.mount === 'function') {
+          cb();
+        } else {
+          requestAnimationFrame(test);
         }
-      }, document.getElementById('widget-container'));
+      };
+      test();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      whenSDKReady(() => {
+        console.log('✅ SDK detected, mounting widget…');
+
+        window.ElevenLabsConAI.mount(
+          {
+            agentId: 'agent_01jz3mzxkkfw09832nvhjtxqyy',
+
+            /* ❸ Register the pause tool right here */
+            clientTools: {
+              PAUSE_5_Second: async () => {
+                console.log('↪ calling /pause …');
+                await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+                console.log('✅ PAUSE_5_Second finished');
+                return {};
+              }
+            },
+
+            /* optional visual tweaks */
+            theme: 'light'
+          },
+          document.getElementById('widget-container')
+        );
+      });
     });
   </script>
-
 </body>
 </html>
