@@ -2,45 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>English Speaking Test</title>
-
-  <!-- 1️⃣  Register the client-side tool BEFORE the widget loads -->
-  <script>
-    // Create the global namespace the widget looks for
-    window.ElevenLabsConAI = window.ElevenLabsConAI || {};
-    window.ElevenLabsConAI.tools = [
-      {
-        /* must exactly match the name the agent calls */
-        name: "PAUSE_5_Second",
-
-        /* description shown in dashboard (optional) */
-        description: "Pause the test for 5 seconds",
-
-        /* no parameters in this tool */
-        parameters: [],
-
-        /* what to do when the agent invokes it */
-        execute: async () => {
-          /* hit the Render endpoint you already built */
-          await fetch("https://timeout-ri84.onrender.com/pause", { method: "POST" });
-
-          /* Tell the agent we’re done (can be empty JSON) */
-          return { ok: true };
-        }
-      }
-    ];
-  </script>
 </head>
 <body>
-  <!-- 2️⃣  The embedded widget -->
-  <elevenlabs-convai
-      agent-id="agent_01jz3mzxkkfw09832nvhjtxqyy"
-      /* optional but harmless: lets the widget warn if the tool is missing */
-      pause-tool-name="PAUSE_5_Second">
-  </elevenlabs-convai>
+  <div id="widget-container"></div>
 
-  <!-- 3️⃣  Load the widget AFTER the tool list exists -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+  <script>
+    // Define the pause tool BEFORE the widget loads
+    window.ElevenLabsConAI = {
+      clientTools: {
+        "PAUSE_5_Second": {
+          type: "pause",
+          args: {
+            duration: 5000
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Load the widget -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async onload="mountWidget()"></script>
+
+  <script>
+    function mountWidget() {
+      const widget = document.createElement("elevenlabs-convai");
+      widget.setAttribute("agent-id", "agent_01jz3mzxkkfw09832nvhjtxqyy");
+      widget.setAttribute("pause-tool-name", "PAUSE_5_Second");
+      widget.setAttribute("pause-endpoint", "https://timeout-ri84.onrender.com/pause");
+
+      document.getElementById("widget-container").appendChild(widget);
+    }
+  </script>
 </body>
 </html>
