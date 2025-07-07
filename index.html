@@ -21,14 +21,14 @@
       const widget = document.querySelector('elevenlabs-convai');
       if (!widget) return;
 
-      /* ← ADDED: grab URL params once */
-      const qs         = new URLSearchParams(window.location.search);
-      const email      = qs.get('email')      || '';
-      const firstName  = qs.get('first_name') || '';
-      const lastName   = qs.get('last_name')  || '';
+      /* grab URL params once */
+      const qs        = new URLSearchParams(window.location.search);
+      const email     = qs.get('email')      || '';
+      const firstName = qs.get('first_name') || '';
+      const lastName  = qs.get('last_name')  || '';
 
       widget.addEventListener('elevenlabs-convai:call', (event) => {
-        // EXACTLY per docs: replace/define the clientTools object
+        // client-side tool
         event.detail.config.clientTools = {
           PAUSE_5_Second: async () => {
             try {
@@ -41,8 +41,8 @@
           }
         };
 
-        /* ← ADDED: inject metadata so it travels with the session */
-        event.detail.config.metadata = {
+        /* inject metadata so it travels with the session */
+        event.detail.config.conversationMetadata = {   <!--  ← only change -->
           email:      email,
           first_name: firstName,
           last_name:  lastName
