@@ -21,6 +21,12 @@
       const widget = document.querySelector('elevenlabs-convai');
       if (!widget) return;
 
+      /* ← ADDED: grab URL params once */
+      const qs         = new URLSearchParams(window.location.search);
+      const email      = qs.get('email')      || '';
+      const firstName  = qs.get('first_name') || '';
+      const lastName   = qs.get('last_name')  || '';
+
       widget.addEventListener('elevenlabs-convai:call', (event) => {
         // EXACTLY per docs: replace/define the clientTools object
         event.detail.config.clientTools = {
@@ -33,6 +39,13 @@
             }
             return {};          // must return an object (can be empty)
           }
+        };
+
+        /* ← ADDED: inject metadata so it travels with the session */
+        event.detail.config.metadata = {
+          email:      email,
+          first_name: firstName,
+          last_name:  lastName
         };
       });
     });
