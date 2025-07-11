@@ -7,15 +7,12 @@
 </head>
 <body>
 
-  <!-- 1 . Embed the widget -->
+  <!-- 1. Embed the widget -->
   <elevenlabs-convai
     agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz">
   </elevenlabs-convai>
 
-  <!-- 2 . Load the widget SDK -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
-
-  <!-- 3 . Register the client-side tool before the first call -->
+  <!-- 2. Register the client-side tool before the first call -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const widget = document.querySelector('elevenlabs-convai');
@@ -50,6 +47,9 @@
       });
     });
   </script>
+
+  <!-- 3. Load the widget SDK after the listener is in place -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 
 </body>
 </html>
