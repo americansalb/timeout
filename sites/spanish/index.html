@@ -7,40 +7,49 @@
 </head>
 <body>
 
-  <!-- 1. Embed the widget -->
-  <elevenlabs-convai agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"></elevenlabs-convai>
+  <!-- 1 . Embed the widget -->
+  <elevenlabs-convai
+    agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz">
+  </elevenlabs-convai>
 
-  <!-- 2. Register the PAUSE tool and metadata BEFORE the widget connects -->
+  <!-- 2 . Load the widget SDK -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+
+  <!-- 3 . Register the client-side tool before the first call -->
   <script>
-    // When the widget establishes a connection, inject tools and metadata
-    window.addEventListener('elevenlabs-convai:connect', (event) => {
-      const cfg = event.detail.config;
+    document.addEventListener('DOMContentLoaded', () => {
+      const widget = document.querySelector('elevenlabs-convai');
+      if (!widget) return;
 
-      // 2‑a. PAUSE tool available throughout the conversation
-      cfg.clientTools = {
-        PAUSE_5_Second: async () => {
-          try {
-            await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
-            console.log('PAUSE_5_Second invoked');
-          } catch (err) {
-            console.error('Pause endpoint failed:', err);
-          }
-          return {}; // must return an object (can be empty)
-        }
-      };
-
-      // 2‑b. Pass metadata from URL parameters
+      /* grab URL params once */
       const qs        = new URLSearchParams(window.location.search);
-      cfg.conversationMetadata = {
-        email:      qs.get('email')      || '',
-        first_name: qs.get('first_name') || '',
-        last_name:  qs.get('last_name')  || ''
-      };
+      const email     = qs.get('email')      || '';
+      const firstName = qs.get('first_name') || '';
+      const lastName  = qs.get('last_name')  || '';
+
+      widget.addEventListener('elevenlabs-convai:call', (event) => {
+        // client-side tool
+        event.detail.config.clientTools = {
+          PAUSE_5_Second: async () => {
+            try {
+              await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+              console.log('PAUSE_5_Second invoked');
+            } catch (err) {
+              console.error('Pause endpoint failed:', err);
+            }
+            return {};          // must return an object (can be empty)
+          }
+        };
+
+        /* inject metadata so it travels with the session */
+        event.detail.config.conversationMetadata = {
+          email:      email,
+          first_name: firstName,
+          last_name:  lastName
+        };
+      });
     });
   </script>
-
-  <!-- 3. Load the widget SDK last to honour the listener above -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 
 </body>
 </html>
