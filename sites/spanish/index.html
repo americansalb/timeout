@@ -12,12 +12,12 @@
     agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz">
   </elevenlabs-convai>
 
-  <!-- 2. Load the widget SDK -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+  <!-- 2. Load the widget SDK AFTER we register the tool -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 
   <!-- 3. Register the client-side tool before the first call -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    (function () {
       const widget = document.querySelector('elevenlabs-convai');
       if (!widget) return;
 
@@ -48,7 +48,7 @@
           last_name:  lastName
         };
       });
-    });
+    })();
   </script>
 
 </body>
