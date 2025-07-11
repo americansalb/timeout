@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
@@ -7,28 +7,28 @@
 </head>
 <body>
 
-  <!-- 1 . Embed the widget -->
+  <!-- 1. Embed the widget -->
   <elevenlabs-convai
     agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz">
   </elevenlabs-convai>
 
-  <!-- 2 . Load the widget SDK -->
+  <!-- 2. Load the widget SDK -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
 
-  <!-- 3 . Register the client-side tool **before the first call** -->
+  <!-- 3. Register the client-side tool before the first call -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const widget = document.querySelector('elevenlabs-convai');
       if (!widget) return;
 
-      /* grab URL params once */
+      /* URL parameters: ?email=...&first_name=...&last_name=... */
       const qs        = new URLSearchParams(window.location.search);
       const email     = qs.get('email')      || '';
       const firstName = qs.get('first_name') || '';
       const lastName  = qs.get('last_name')  || '';
 
       widget.addEventListener('elevenlabs-convai:call', (event) => {
-        // client-side tool
+        /* Register PAUSE tool */
         event.detail.config.clientTools = {
           PAUSE_5_Second: async () => {
             try {
@@ -37,12 +37,12 @@
             } catch (err) {
               console.error('Pause endpoint failed:', err);
             }
-            return {};          // must return an object (can be empty)
+            return {};            // must return an object
           }
         };
 
-        /* inject metadata so it travels with the session */
-        event.detail.config.conversationMetadata = {   <!--  ← only change -->
+        /* Attach metadata to the conversation */
+        event.detail.config.conversationMetadata = {
           email:      email,
           first_name: firstName,
           last_name:  lastName
