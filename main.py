@@ -49,8 +49,8 @@ class DummyAudioInterface(AudioInterface):
         pass
 
 def pause_handler(params):
-    """Block for five seconds (ElevenLabs enforces time‑out)."""
-    time.sleep(5)
+    """Block for ten seconds (ElevenLabs enforces time‑out)."""
+    time.sleep(10)
 
 # Register the client tool once
 TOOLS_NAME = os.environ.get("TOOL_NAME", "PAUSE_5_Second")
