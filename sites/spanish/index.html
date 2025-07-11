@@ -7,18 +7,17 @@
 </head>
 <body>
 
-  <!-- 1. Embed the widget -->
+  <!-- 1. Embed the widget but keep it idle until tools are registered -->
   <elevenlabs-convai
-    agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz">
+    id="convai"
+    agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"
+    auto-start="false">
   </elevenlabs-convai>
 
-  <!-- 2. Load the widget SDK AFTER we register the tool -->
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
-
-  <!-- 3. Register the client-side tool before the first call -->
+  <!-- 2. Tool registration & metadata -->
   <script>
     (function () {
-      const widget = document.querySelector('elevenlabs-convai');
+      const widget = document.getElementById('convai');
       if (!widget) return;
 
       /* URL parameters: ?email=...&first_name=...&last_name=... */
@@ -28,7 +27,7 @@
       const lastName  = qs.get('last_name')  || '';
 
       widget.addEventListener('elevenlabs-convai:call', (event) => {
-        /* Register PAUSE tool */
+        // Register PAUSE tool exactly once per conversation
         event.detail.config.clientTools = {
           PAUSE_5_Second: async () => {
             try {
@@ -37,19 +36,25 @@
             } catch (err) {
               console.error('Pause endpoint failed:', err);
             }
-            return {};            // must return an object
+            return {}; // must return an object (can be empty)
           }
         };
 
-        /* Attach metadata to the conversation */
+        // Attach metadata so it travels with the session
         event.detail.config.conversationMetadata = {
           email:      email,
           first_name: firstName,
           last_name:  lastName
         };
       });
+
+      // All listeners are now wired — start the widget
+      widget.start();
     })();
   </script>
+
+  <!-- 3. Load the widget SDK last so our tool registration runs first -->
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 
 </body>
 </html>
