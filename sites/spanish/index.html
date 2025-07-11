@@ -7,18 +7,25 @@
 </head>
 <body>
 
-  <elevenlabs-convai agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"></elevenlabs-convai>
+  <elevenlabs-convai id="convai" agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"></elevenlabs-convai>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const widget = document.querySelector('elevenlabs-convai');
+      console.log('DOMContentLoaded', Date.now());
+
+      const widget = document.getElementById('convai');
       if (!widget) return;
 
-      const qs        = new URLSearchParams(window.location.search);
-      const email     = qs.get('email')      || '';
-      const firstName = qs.get('first_name') || '';
-      const lastName  = qs.get('last_name')  || '';
+      // timeline logs
+      widget.addEventListener('elevenlabs-convai:connect', () => {
+        console.log('connect', Date.now());
+      });
 
+      widget.addEventListener('elevenlabs-convai:call', () => {
+        console.log('call', Date.now());
+      });
+
+      // tool + metadata for every call
       widget.addEventListener('elevenlabs-convai:call', event => {
         event.detail.config.clientTools = {
           PAUSE_5_Second: async () => {
@@ -28,14 +35,15 @@
             } catch (err) {
               console.error('Pause endpoint failed:', err);
             }
-            return {};
+            return {}; // must return an object
           }
         };
 
+        const qs = new URLSearchParams(window.location.search);
         event.detail.config.conversationMetadata = {
-          email,
-          first_name: firstName,
-          last_name:  lastName
+          email:      qs.get('email')      || '',
+          first_name: qs.get('first_name') || '',
+          last_name:  qs.get('last_name')  || ''
         };
       });
     });
