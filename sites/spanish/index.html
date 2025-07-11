@@ -7,53 +7,39 @@
 </head>
 <body>
 
-  <!-- 1. Embed the widget but keep it idle until tools are registered -->
-  <elevenlabs-convai
-    id="convai"
-    agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"
-    auto-start="false">
-  </elevenlabs-convai>
+  <!-- 1. Embed the widget -->
+  <elevenlabs-convai agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"></elevenlabs-convai>
 
-  <!-- 2. Tool registration & metadata -->
+  <!-- 2. Register the PAUSE tool and metadata BEFORE the widget connects -->
   <script>
-    (function () {
-      const widget = document.getElementById('convai');
-      if (!widget) return;
+    // When the widget establishes a connection, inject tools and metadata
+    window.addEventListener('elevenlabs-convai:connect', (event) => {
+      const cfg = event.detail.config;
 
-      /* URL parameters: ?email=...&first_name=...&last_name=... */
-      const qs        = new URLSearchParams(window.location.search);
-      const email     = qs.get('email')      || '';
-      const firstName = qs.get('first_name') || '';
-      const lastName  = qs.get('last_name')  || '';
-
-      widget.addEventListener('elevenlabs-convai:call', (event) => {
-        // Register PAUSE tool exactly once per conversation
-        event.detail.config.clientTools = {
-          PAUSE_5_Second: async () => {
-            try {
-              await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
-              console.log('PAUSE_5_Second invoked');
-            } catch (err) {
-              console.error('Pause endpoint failed:', err);
-            }
-            return {}; // must return an object (can be empty)
+      // 2‑a. PAUSE tool available throughout the conversation
+      cfg.clientTools = {
+        PAUSE_5_Second: async () => {
+          try {
+            await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
+            console.log('PAUSE_5_Second invoked');
+          } catch (err) {
+            console.error('Pause endpoint failed:', err);
           }
-        };
+          return {}; // must return an object (can be empty)
+        }
+      };
 
-        // Attach metadata so it travels with the session
-        event.detail.config.conversationMetadata = {
-          email:      email,
-          first_name: firstName,
-          last_name:  lastName
-        };
-      });
-
-      // All listeners are now wired — start the widget
-      widget.start();
-    })();
+      // 2‑b. Pass metadata from URL parameters
+      const qs        = new URLSearchParams(window.location.search);
+      cfg.conversationMetadata = {
+        email:      qs.get('email')      || '',
+        first_name: qs.get('first_name') || '',
+        last_name:  qs.get('last_name')  || ''
+      };
+    });
   </script>
 
-  <!-- 3. Load the widget SDK last so our tool registration runs first -->
+  <!-- 3. Load the widget SDK last to honour the listener above -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 
 </body>
