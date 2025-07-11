@@ -5,36 +5,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Spanish Speaking Test</title>
 
-  <!-- Make the tool & metadata available BEFORE the SDK loads -->
+  <!-- 0.  Make the PAUSE tool available before the SDK loads -->
   <script>
-    /* 1 – tool map that the SDK will pick up immediately */
-    window.elevenlabsConvaiClientTools = {
-      PAUSE_5_Second: async () => {
-        try {
-          await fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' });
-          console.log('PAUSE_5_Second invoked');
-        } catch (err) {
-          console.error('Pause endpoint failed:', err);
-        }
-        return {};           // must return an object
-      }
-    };
+    // Core tool definition
+    function pauseFiveSecond() {
+      return fetch('https://timeout-ri84.onrender.com/pause', { method: 'POST' })
+        .then(() => console.log('PAUSE_5_Second invoked'))
+        .catch(err => console.error('Pause endpoint failed:', err))
+        .then(() => ({})); // must return an object
+    }
 
-    /* 2 – metadata (optional) */
+    // Primary global the SDK should read
+    window.elevenlabsConvaiClientTools = { PAUSE_5_Second: pauseFiveSecond };
+
+    // Other possible aliases the SDK might check
+    window.elevenlabsClientTools          = window.elevenlabsConvaiClientTools;
+    window.elevenlabs_convai_client_tools = window.elevenlabsConvaiClientTools;
+    window.ELEVENLABS_CONVAI_CLIENT_TOOLS = window.elevenlabsConvaiClientTools;
+    window.elevenlabs_widget_client_tools = window.elevenlabsConvaiClientTools;
+
+    // Optional metadata from URL parameters
     const qs = new URLSearchParams(window.location.search);
     window.elevenlabsConvaiConversationMetadata = {
       email:      qs.get('email')      || '',
       first_name: qs.get('first_name') || '',
       last_name:  qs.get('last_name')  || ''
     };
+
+    // Log which globals the SDK can see once it connects
+    window.addEventListener('elevenlabs-convai:connect', () => {
+      console.log('globals visible to SDK', {
+        elevenlabsConvaiClientTools:        window.elevenlabsConvaiClientTools,
+        elevenlabsClientTools:              window.elevenlabsClientTools,
+        elevenlabs_convai_client_tools:     window.elevenlabs_convai_client_tools,
+        ELEVENLABS_CONVAI_CLIENT_TOOLS:     window.ELEVENLABS_CONVAI_CLIENT_TOOLS,
+        elevenlabs_widget_client_tools:     window.elevenlabs_widget_client_tools
+      });
+    });
   </script>
 </head>
 <body>
 
-  <!-- Widget -->
+  <!-- Widget element -->
   <elevenlabs-convai agent-id="agent_01jz3qjsftfrt8jhzg64bmfdrz"></elevenlabs-convai>
 
-  <!-- SDK loads last; it will find the global tool map already set -->
+  <!-- Load the SDK last so it can immediately read the globals above -->
   <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" defer></script>
 </body>
 </html>
